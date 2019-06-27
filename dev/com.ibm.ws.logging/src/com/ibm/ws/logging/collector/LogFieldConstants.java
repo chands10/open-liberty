@@ -105,6 +105,10 @@ public class LogFieldConstants {
     public static final String IBM_REASON = "ibm_reason";
     public static final String REASON = "reason";
 
+    //liberty_batchlog
+    public static final String IBM_BATCHMESSAGE = "ibm_batchMessage";
+    public static final String BATCHMESSAGE = "batchMessage";
+
     //other
     public static final String IBM_TAG = "ibm_";
     public static final String UTF_8 = "UTF-8";
