@@ -32,6 +32,8 @@ public class CollectorJsonHelpers {
     private static String startFFDCJson1_1 = null;
     private static String startAccessLogJson = null;
     private static String startAccessLogJson1_1 = null;
+    private static String startBatchJobLogJson = null;
+    private static String startBatchJobLogJson1_1 = null;
     private static String startGCJson = null;
     private static String startGCJson1_1 = null;
     private static String startAuditJson = null;
@@ -41,6 +43,7 @@ public class CollectorJsonHelpers {
     private static final String MESSAGE_JSON_TYPE_FIELD = TYPE_FIELD_PREPPEND + CollectorConstants.MESSAGES_LOG_EVENT_TYPE + TYPE_FIELD_APPEND;
     private static final String TRACE_JSON_TYPE_FIELD = TYPE_FIELD_PREPPEND + CollectorConstants.TRACE_LOG_EVENT_TYPE + TYPE_FIELD_APPEND;
     private static final String ACCESS_JSON_TYPE_FIELD = TYPE_FIELD_PREPPEND + CollectorConstants.ACCESS_LOG_EVENT_TYPE + TYPE_FIELD_APPEND;
+    private static final String BATCHJOB_JSON_TYPE_FIELD = TYPE_FIELD_PREPPEND + CollectorConstants.BATCHJOB_LOG_EVENT_TYPE + TYPE_FIELD_APPEND;
     private static final String FFDC_JSON_TYPE_FIELD = TYPE_FIELD_PREPPEND + CollectorConstants.FFDC_EVENT_TYPE + TYPE_FIELD_APPEND;
     private static final String GC_JSON_TYPE_FIELD = TYPE_FIELD_PREPPEND + CollectorConstants.GC_EVENT_TYPE + TYPE_FIELD_APPEND;
     private static final String AUDIT_JSON_TYPE_FIELD = TYPE_FIELD_PREPPEND + CollectorConstants.AUDIT_LOG_EVENT_TYPE + TYPE_FIELD_APPEND;
@@ -74,6 +77,8 @@ public class CollectorJsonHelpers {
             return CollectorConstants.FFDC_EVENT_TYPE;
         } else if (source.endsWith(CollectorConstants.ACCESS_LOG_SOURCE) && location.equals(CollectorConstants.MEMORY)) {
             return CollectorConstants.ACCESS_LOG_EVENT_TYPE;
+        } else if (source.endsWith(CollectorConstants.BATCHJOB_LOG_SOURCE) && location.equals(CollectorConstants.MEMORY)) {
+            return CollectorConstants.BATCHJOB_LOG_EVENT_TYPE;
         } else if (source.contains(CollectorConstants.AUDIT_LOG_SOURCE)) {
             return CollectorConstants.AUDIT_LOG_EVENT_TYPE;
         } else
@@ -147,7 +152,7 @@ public class CollectorJsonHelpers {
      * Escape \b, \f, \n, \r, \t, ", \, / characters and appends to a string builder
      *
      * @param sb String builder to append to
-     * @param s String to escape
+     * @param s  String to escape
      */
     protected static void jsonEscape3(StringBuilder sb, String s) {
         for (int i = 0; i < s.length(); i++) {
@@ -269,6 +274,22 @@ public class CollectorJsonHelpers {
         return sb;
     }
 
+    protected static StringBuilder startBatchJobLogJson(String hostName, String wlpUserDir, String serverName) {
+        StringBuilder sb = new StringBuilder(512);
+
+        if (startBatchJobLogJson != null) {
+            sb.append(startBatchJobLogJson);
+        } else {
+            sb.append("{");
+            sb.append(BATCHJOB_JSON_TYPE_FIELD);
+            addUnchangingFields(sb, hostName, wlpUserDir, serverName);
+
+            startBatchJobLogJson = sb.toString();
+        }
+
+        return sb;
+    }
+
     protected static StringBuilder startGCJson(String hostName, String wlpUserDir, String serverName) {
         StringBuilder sb = new StringBuilder(512);
 
@@ -374,6 +395,22 @@ public class CollectorJsonHelpers {
             addUnchangingFields1_1(sb, hostName, wlpUserDir, serverName);
 
             startAccessLogJson1_1 = sb.toString();
+        }
+
+        return sb;
+    }
+
+    protected static StringBuilder startBatchJobLogJson1_1(String hostName, String wlpUserDir, String serverName) {
+        StringBuilder sb = new StringBuilder(512);
+
+        if (startBatchJobLogJson1_1 != null) {
+            sb.append(startBatchJobLogJson1_1);
+        } else {
+            sb.append("{");
+            sb.append(BATCHJOB_JSON_TYPE_FIELD);
+            addUnchangingFields1_1(sb, hostName, wlpUserDir, serverName);
+
+            startBatchJobLogJson1_1 = sb.toString();
         }
 
         return sb;

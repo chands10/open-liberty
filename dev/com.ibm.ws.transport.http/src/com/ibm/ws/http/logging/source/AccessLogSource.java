@@ -68,6 +68,7 @@ public class AccessLogSource implements Source {
         if (TraceComponent.isAnyTracingEnabled() && tc.isEventEnabled()) {
             Tr.event(tc, "Setting buffer manager " + this);
         }
+        System.out.println("Starting buffer manager accessLogSource");
         this.bufferMgr = bufferMgr;
         startSource();
     }
@@ -80,6 +81,7 @@ public class AccessLogSource implements Source {
         }
         //Indication that the buffer will no longer be available
         stopSource();
+        System.out.println("Stopping buffer manager accessLogSource");
         this.bufferMgr = null;
     }
 

@@ -92,6 +92,7 @@ public class SourceManager {
             //and it can start sending events to this buffer.
             source.setBufferManager(this.bufferMgr);
         }
+
         subscribers.add(handlerId);
         /*
          * Inform the handler that this source/buffer/conduit is now available:

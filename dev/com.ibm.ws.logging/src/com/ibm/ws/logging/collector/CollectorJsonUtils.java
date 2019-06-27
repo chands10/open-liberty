@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import com.ibm.websphere.ras.DataFormatHelper;
 import com.ibm.ws.logging.data.AccessLogData;
+import com.ibm.ws.logging.data.BatchJobLogData;
 import com.ibm.ws.logging.data.FFDCData;
 import com.ibm.ws.logging.data.GCData;
 import com.ibm.ws.logging.data.GenericData;
@@ -40,14 +41,14 @@ public class CollectorJsonUtils {
      * Method to return log event data in json format. If the collector version passed is greater than 1.0
      * then the jsonifyEvent call is passed to another version of CollectorJsonUtils.
      *
-     * @param event The object originating from logging source which contains necessary fields
-     * @param eventType The type of event
-     * @param servername The name of the server
-     * @param wlpUserDir The name of wlp user directory
-     * @param serverHostName The name of server host
+     * @param event            The object originating from logging source which contains necessary fields
+     * @param eventType        The type of event
+     * @param servername       The name of the server
+     * @param wlpUserDir       The name of wlp user directory
+     * @param serverHostName   The name of server host
      * @param collectorVersion The version number
-     * @param tags An array of tags
-     * @param maxFieldLength The max character length of strings
+     * @param tags             An array of tags
+     * @param maxFieldLength   The max character length of strings
      */
     public static String jsonifyEvent(Object event, String eventType, String serverName, String wlpUserDir, String serverHostName, String collectorVersion, String[] tags,
                                       int maxFieldLength) {
@@ -77,6 +78,10 @@ public class CollectorJsonUtils {
             } else if (eventType.equals(CollectorConstants.ACCESS_LOG_EVENT_TYPE)) {
 
                 return jsonifyAccess(wlpUserDir, serverName, serverHostName, event, tags);
+
+            } else if (eventType.equals(CollectorConstants.BATCHJOB_LOG_EVENT_TYPE)) {
+
+                return jsonifyBatchJob(wlpUserDir, serverName, serverHostName, event, tags);
 
             } else if (eventType.equals(CollectorConstants.AUDIT_LOG_EVENT_TYPE)) {
 
@@ -255,6 +260,27 @@ public class CollectorJsonUtils {
         CollectorJsonHelpers.addToJSON(sb, accessLogData.getDatetimeKey(), datetime, false, true, false, false, false);
 
         CollectorJsonHelpers.addToJSON(sb, accessLogData.getSequenceKey(), accessLogData.getSequence(), false, true, false, false, false);
+
+        if (tags != null) {
+            addTagNameForVersion(sb).append(CollectorJsonHelpers.jsonifyTags(tags));
+        }
+
+        sb.append("}");
+
+        return sb.toString();
+    }
+
+    private static String jsonifyBatchJob(String wlpUserDir,
+                                          String serverName, String hostName, Object event, String[] tags) {
+        BatchJobLogData batchJobLogData = (BatchJobLogData) event;
+
+        StringBuilder sb = CollectorJsonHelpers.startBatchJobLogJson(hostName, wlpUserDir, serverName);
+
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getThreadIDKey(), Long.toString(batchJobLogData.getThreadID()), false, true, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getBatchMessageKey(), batchJobLogData.getBatchMessage(), false, true, false, false);
+
+        String datetime = CollectorJsonHelpers.dateFormatTL.get().format(batchJobLogData.getDatetime());
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getDatetimeKey(), datetime, false, true, false, false, false);
 
         if (tags != null) {
             addTagNameForVersion(sb).append(CollectorJsonHelpers.jsonifyTags(tags));
