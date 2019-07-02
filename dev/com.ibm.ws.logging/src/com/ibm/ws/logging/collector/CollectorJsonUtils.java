@@ -276,11 +276,29 @@ public class CollectorJsonUtils {
 
         StringBuilder sb = CollectorJsonHelpers.startBatchJobLogJson(hostName, wlpUserDir, serverName);
 
-        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getThreadIDKey(), Long.toString(batchJobLogData.getThreadID()), false, true, false, false);
-        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getBatchMessageKey(), batchJobLogData.getBatchMessage(), false, true, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getThreadIdKey(), Long.toString(batchJobLogData.getThreadId()), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getJobNameKey(), batchJobLogData.getJobName(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getInstanceIdKey(), Long.toString(batchJobLogData.getInstanceId()), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getExecutionIdKey(), Long.toString(batchJobLogData.getExecutionId()), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getMessageKey(), batchJobLogData.getMessage(), false, true, false, false, false);
 
         String datetime = CollectorJsonHelpers.dateFormatTL.get().format(batchJobLogData.getDatetime());
         CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getDatetimeKey(), datetime, false, true, false, false, false);
+
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getModuleKey(), batchJobLogData.getModule(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getSeverityKey(), batchJobLogData.getSeverity(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getLoglevelKey(), batchJobLogData.getLoglevel(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getMethodNameKey(), batchJobLogData.getMethodName(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getClassNameKey(), batchJobLogData.getClassName(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getJobParametersKey(), batchJobLogData.getJobParameters(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getPartitionStepKey(), batchJobLogData.getPartitionStep(), false, true, false, false, false);
+        if (batchJobLogData.getPartitionNumber() != -1) {
+            CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getPartitionNumberKey(), Integer.toString(batchJobLogData.getPartitionNumber()), false, true, false, false, false);
+        } else {
+            CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getPartitionNumberKey(), null, false, true, false, false, false);
+        }
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getSplitNameKey(), batchJobLogData.getSplitName(), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getFlowNameKey(), batchJobLogData.getFlowName(), false, true, false, false, false);
 
         if (tags != null) {
             addTagNameForVersion(sb).append(CollectorJsonHelpers.jsonifyTags(tags));
