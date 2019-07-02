@@ -275,7 +275,7 @@ public class CollectorJsonHelpers {
     }
 
     protected static StringBuilder startBatchJobLogJson(String hostName, String wlpUserDir, String serverName) {
-        StringBuilder sb = new StringBuilder(512);
+        StringBuilder sb = new StringBuilder(8192);
 
         if (startBatchJobLogJson != null) {
             sb.append(startBatchJobLogJson);

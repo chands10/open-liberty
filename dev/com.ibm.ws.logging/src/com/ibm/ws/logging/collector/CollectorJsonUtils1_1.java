@@ -256,8 +256,8 @@ public class CollectorJsonUtils1_1 {
 
         StringBuilder sb = CollectorJsonHelpers.startBatchJobLogJson(hostName, wlpUserDir, serverName);
 
-        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getThreadIDKey1_1(), Long.toString(batchJobLogData.getThreadID()), false, true, false, false);
-        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getBatchMessageKey1_1(), batchJobLogData.getBatchMessage(), false, true, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getThreadIDKey1_1(), Long.toString(batchJobLogData.getThreadID()), false, true, false, false, false);
+        CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getBatchMessageKey1_1(), batchJobLogData.getBatchMessage(), false, true, false, false, false);
 
         String datetime = CollectorJsonHelpers.dateFormatTL.get().format(batchJobLogData.getDatetime());
         CollectorJsonHelpers.addToJSON(sb, batchJobLogData.getDatetimeKey1_1(), datetime, false, true, false, false, false);
