@@ -106,8 +106,22 @@ public class LogFieldConstants {
     public static final String REASON = "reason";
 
     //liberty_batchlog
-    public static final String IBM_BATCHMESSAGE = "ibm_batchMessage";
-    public static final String BATCHMESSAGE = "batchMessage";
+    public static final String IBM_JOBNAME = "ibm_jobName";
+    public static final String JOBNAME = "jobName";
+    public static final String IBM_INSTANCEID = "ibm_instanceId";
+    public static final String INSTANCEID = "instanceId";
+    public static final String IBM_EXECUTIONID = "ibm_exectionId";
+    public static final String EXECUTIONID = "executionId";
+    public static final String IBM_JOBPARAMETERS = "ibm_jobParameters";
+    public static final String JOBPARAMETERS = "jobParameters";
+    public static final String IBM_PARTITIONSTEP = "ibm_partitionStep";
+    public static final String PARTITIONSTEP = "partitionStep";
+    public static final String IBM_PARTITIONNUMBER = "ibm_partitionNumber";
+    public static final String PARTITIONNUMBER = "partitionNumber";
+    public static final String IBM_SPLITNAME = "ibm_splitName";
+    public static final String SPLITNAME = "splitName";
+    public static final String IBM_FLOWNAME = "ibm_flowName";
+    public static final String FLOWNAME = "flowName";
 
     //other
     public static final String IBM_TAG = "ibm_";
