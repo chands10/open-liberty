@@ -49,7 +49,9 @@ import com.ibm.ws.jbatch.joblog.JobExecutionLog;
 import com.ibm.ws.jbatch.joblog.JobInstanceLog;
 import com.ibm.ws.jbatch.joblog.JobLogConstants;
 import com.ibm.ws.jbatch.joblog.services.IJobLogManagerService;
+import com.ibm.ws.jbatch.joblog.source.BatchJobLogSource;
 import com.ibm.ws.kernel.security.thread.ThreadIdentityManager;
+import com.ibm.wsspi.collector.manager.Source;
 import com.ibm.wsspi.kernel.service.location.WsLocationAdmin;
 
 /**
@@ -86,7 +88,7 @@ public class JobLogManagerImpl implements IJobLogManagerService {
      * Our special java.util.logging.Handler. This guy writes to the job logs.
      * All Loggers that this guy is added to, will log to the job log (in addition
      * to wherever else they're configured to log to, e.g. the server log).
-     * 
+     *
      * This guy is registered with all loggers named in the "jobLoggers" config attribute.
      * It's registered with the root logger if includeServerLogging=true, so that
      * all server logging is routed to the job log as well, in addition to the server log.
@@ -126,11 +128,13 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /** {@inheritDoc} */
     @Override
-    public void init(IBatchConfig batchConfig) {}
+    public void init(IBatchConfig batchConfig) {
+    }
 
     /** {@inheritDoc} */
     @Override
-    public void shutdown() {}
+    public void shutdown() {
+    }
 
     /**
      * Called by DS to inject location service ref
@@ -171,6 +175,16 @@ public class JobLogManagerImpl implements IJobLogManagerService {
             this.eventsPublisher = null;
     }
 
+    /**
+     * DS injection to send to jobLogHandler
+     */
+    @Reference(target = "(component.name=com.ibm.ws.jbatch.joblog.source.BatchJobLogSource)",
+               cardinality = ReferenceCardinality.OPTIONAL,
+               policyOption = ReferencePolicyOption.GREEDY)
+    protected void setBatchJobLogSource(Source batchJobLogSource) {
+        joblogHandler.setBatchJobLogSource((BatchJobLogSource) batchJobLogSource);
+    }
+
     protected BatchEventsPublisher getEventsPublisher() {
         return this.eventsPublisher;
     }
@@ -184,10 +198,10 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * Only set the execution context if job logging is enabled, because
      * setting the execution context will cause the first joblog file to be created.
-     * 
+     *
      */
     @Override
     public void workUnitStarted(WorkUnitDescriptor ctx) {
@@ -202,9 +216,9 @@ public class JobLogManagerImpl implements IJobLogManagerService {
                     //No initial log handler added to this job.
                     logger.log(Level.SEVERE, "job.logging.create.new",
                                new Object[] { ctx.getTopLevelJobName(),
-                                             ctx.getTopLevelInstanceId(),
-                                             ctx.getTopLevelExecutionId(),
-                                             e.toString() });
+                                              ctx.getTopLevelInstanceId(),
+                                              ctx.getTopLevelExecutionId(),
+                                              e.toString() });
 
                 }
 
@@ -214,7 +228,7 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * Clear the execution context regardless of whether job logging is enabled.
      * This ensures that the context is cleared in the event that job logging was
      * initially enabled when the job started but was subsequently disabled.
@@ -226,9 +240,9 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * Retrieve the JobExecutionLogs for all executions associated with the given instance.
-     * 
+     *
      * @throws BatchJobNotLocalException
      */
     @Override
@@ -256,7 +270,7 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /**
      * Gets the local Job Instance Log file list.
-     * 
+     *
      * @param jobInstanceId
      */
     @Override
@@ -286,10 +300,10 @@ public class JobLogManagerImpl implements IJobLogManagerService {
         return retMe;
 
     }
-    
+
     /**
      * Gets Job Instance Log file list, including non-local executions.
-     * 
+     *
      * @param jobInstanceId
      */
     @Override
@@ -318,7 +332,7 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /**
      * Gets the Job Execution Log without doing the local job check/assert.
-     * 
+     *
      * @param jobInstance
      * @param jobExecution
      * @return
@@ -336,9 +350,9 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * Scan the filesystem for all job log parts associated with the given jobExecutionId.
-     * 
+     *
      * @throws BatchJobNotLocalException
      */
     @Override
@@ -410,12 +424,12 @@ public class JobLogManagerImpl implements IJobLogManagerService {
      */
     protected String getJobInstanceLogDirName(String jobName, long instanceId) {
         Object token = null;
-	File dateDir = null;
+        File dateDir = null;
 
-	try {
-	    token = ThreadIdentityManager.runAsServer();
+        try {
+            token = ThreadIdentityManager.runAsServer();
 
-	    String dateDirBase = String.format(getAbsoluteJobLogsRootDirName() + File.separator
+            String dateDirBase = String.format(getAbsoluteJobLogsRootDirName() + File.separator
                                                + "%s" + File.separator
                                                + new SimpleDateFormat("yyyy-MM-dd").format(new Date()),
                                                jobName);
@@ -427,10 +441,10 @@ public class JobLogManagerImpl implements IJobLogManagerService {
                 dateDir = new File(dateDirBase + "_" + extraDir);
                 extraDir++;
             }
-	} finally {
-	    if (token != null)
-		ThreadIdentityManager.reset(token);
-	}
+        } finally {
+            if (token != null)
+                ThreadIdentityManager.reset(token);
+        }
 
         return String.format(dateDir.getPath() + File.separator
                              + "instance.%d",
@@ -454,7 +468,7 @@ public class JobLogManagerImpl implements IJobLogManagerService {
     }
 
     /**
-     * 
+     *
      * A FileFilter for job log files: must be a file (not dir) and must end with ".log".
      */
     protected static final FileFilter JobLogFileFilter = new FileFilter() {
@@ -500,14 +514,14 @@ public class JobLogManagerImpl implements IJobLogManagerService {
 
     /**
      * Set the Level, Filter, and maxRecords props for the JobLogHandler.
-     * 
+     *
      * The Filter is parsed from the configured traceSpecification.
      */
     protected JobLogHandler configureJobLogHandler(Map<String, Object> config) {
 
         if (isJobLoggingEnabled() && (!(Boolean) config.get("enabled"))) {
-            // Job logging was enabled and now is not.  Need to let the 
-            // job log handler know so that, if needed, it can send the final 
+            // Job logging was enabled and now is not.  Need to let the
+            // job log handler know so that, if needed, it can send the final
             // log notification at the end of the job.
             joblogHandler.setFinalNotification(true);
         }

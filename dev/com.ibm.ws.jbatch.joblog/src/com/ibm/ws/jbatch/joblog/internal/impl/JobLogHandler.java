@@ -11,6 +11,7 @@
 package com.ibm.ws.jbatch.joblog.internal.impl;
 
 import java.io.File;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
 import com.ibm.jbatch.container.instance.WorkUnitDescriptor;
 import com.ibm.jbatch.container.ws.events.BatchEventsPublisher;
 import com.ibm.websphere.ras.annotation.Trivial;
+import com.ibm.ws.jbatch.joblog.source.BatchJobLogSource;
 
 /**
  * The batch feature's very own j.u.l.Handler.
@@ -67,6 +69,11 @@ public class JobLogHandler extends Handler {
      * we can remove ourself from those Loggers at deactivation/config update.
      */
     private final List<Logger> registeredWithLoggers = new ArrayList<Logger>();
+
+    /**
+     * For sending job logs to logstash collector
+     */
+    private BatchJobLogSource batchJobLogSource = null;
 
     /**
      * CTOR.
@@ -145,6 +152,12 @@ public class JobLogHandler extends Handler {
             if (fileHandler != null) {
                 addJobDetails(record);
                 fileHandler.publish(record);
+                if (this.batchJobLogSource != null) {
+                    SimpleEntry<String[], Integer> workUnitInfo = fileHandler.getWorkUnitInfo();
+                    String[] workUnitInfoStrings = workUnitInfo.getKey();
+                    this.batchJobLogSource.process(record, fileHandler.getJobName(), fileHandler.getInstanceId(), fileHandler.getExecutionId(),
+                                                   workUnitInfoStrings[0], workUnitInfo.getValue(), workUnitInfoStrings[1], workUnitInfoStrings[2]);
+                }
             }
         } finally {
             loggingInProgress.set(false);
@@ -245,6 +258,13 @@ public class JobLogHandler extends Handler {
      */
     protected void setJobLogManagerImpl(JobLogManagerImpl jobLogManagerImpl) {
         this.jobLogManagerImpl = jobLogManagerImpl;
+    }
+
+    /**
+     * Manual (non-DS) inject.
+     */
+    protected void setBatchJobLogSource(BatchJobLogSource batchJobLogSource) {
+        this.batchJobLogSource = batchJobLogSource;
     }
 
     /**

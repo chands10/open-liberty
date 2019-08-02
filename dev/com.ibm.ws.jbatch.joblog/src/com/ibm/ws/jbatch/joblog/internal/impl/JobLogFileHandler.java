@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
@@ -72,7 +73,7 @@ public class JobLogFileHandler extends StreamHandler {
      * @param maxFileLines
      * @param jobLogEventsOnly
      * @param eventsPublisher
-     * @param execution context
+     * @param execution          context
      *
      * @throws BatchLogPartNotCreatedException
      */
@@ -106,7 +107,7 @@ public class JobLogFileHandler extends StreamHandler {
             previousLogPath = Paths.get(logFile.getPath());
         }
 
-	Object token = null;
+        Object token = null;
 
         logFile = new File(String.format(fileNamePattern, filePart));
 
@@ -167,9 +168,9 @@ public class JobLogFileHandler extends StreamHandler {
         } catch (FileNotFoundException e) { // Catch for FFDC injection
             throw new BatchLogPartNotCreatedException(e);
         } finally {
-	    if (token != null)
-		ThreadIdentityManager.reset(token);
-	}
+            if (token != null)
+                ThreadIdentityManager.reset(token);
+        }
     }
 
     /**
@@ -277,12 +278,12 @@ public class JobLogFileHandler extends StreamHandler {
 
         //Ensure a publisher has been injected, otherwise do not send job log event to be published
         if (getBatchEventsPublisher() != null) {
-	    Object token = null;            
+            Object token = null;
 
-	    try {
+            try {
                 //get the content of the current job log part and send it to be published as a job log event
                 token = ThreadIdentityManager.runAsServer();
-		String logContent = new String(Files.readAllBytes(Paths.get(logFile.getPath())), StandardCharsets.UTF_8);
+                String logContent = new String(Files.readAllBytes(Paths.get(logFile.getPath())), StandardCharsets.UTF_8);
                 sendJobLogEvent(filePart, logContent, true);
 
             } catch (IOException e) {
@@ -292,9 +293,9 @@ public class JobLogFileHandler extends StreamHandler {
             } catch (SecurityException e) {
                 logger.log(Level.WARNING, "job.logging.read.log", new Object[] { ((e.getCause() != null) ? e.getCause() : e) });
             } finally {
-	       if (token != null)
-	              ThreadIdentityManager.reset(token);
-	    }
+                if (token != null)
+                    ThreadIdentityManager.reset(token);
+            }
         }
 
         //close the log since setOutputStream is never called for the final part
@@ -360,6 +361,44 @@ public class JobLogFileHandler extends StreamHandler {
                                                 logContent,
                                                 correlationId);
     }
+
+    /**
+     * Return the current jobName to send to the logstash-collector
+     */
+    public String getJobName() {
+        return execContext.getTopLevelJobName();
+    }
+
+    /**
+     * Return the current instanceId to send to the logstash-collector
+     */
+    public long getInstanceId() {
+        return execContext.getTopLevelInstanceId();
+    }
+
+    /**
+     * Return the current executionId to send to the logstash-collector
+     */
+    public long getExecutionId() {
+        return execContext.getTopLevelExecutionId();
+    }
+
+    /**
+     * Return the current workUnitInfo to send to the logstash-collector
+     * where the key is represented by {partitionStep, splitName, flowName}
+     * and the value is represented by partitionNumber
+     */
+    public SimpleEntry<String[], Integer> getWorkUnitInfo() {
+        switch (execContext.getWorkUnitType()) {
+            case PARTITIONED_STEP:
+                return new SimpleEntry<String[], Integer>(new String[] { execContext.getPartitionedStepName(), null, null }, execContext.getPartitionNumber());
+            case SPLIT_FLOW:
+                return new SimpleEntry<String[], Integer>(new String[] { null, execContext.getSplitName(), execContext.getFlowName() }, -1);
+            default:
+                return new SimpleEntry<String[], Integer>(new String[] { null, null, null }, -1);
+        }
+    }
+
     /**
      * Delete the file or directory provided by the path variable if it exists
      *
